@@ -203,34 +203,35 @@ if user_mode == "🏢 Industry Recruiter":
         col1, col2 = st.columns(2)
         with col1:
             company_name = st.text_input("Company Name")
-            role_title = st.text_input("Job Role / Title")
-            contact_info = st.text_input("Contact Email/Link")
+            # Split into Title and Role to match your Notion columns
+            job_title = st.text_input("Job Title (e.g. Summer Intern)") 
+            role_type = st.text_input("Role Type (e.g. Backend Developer)")
+            
         with col2:
             req_skills = st.text_area("Required Skills (comma separated)", placeholder="Python, React, Data Analysis...")
             job_desc = st.text_area("Job Description", height=135)
+            contact_info = st.text_input("Contact Email/Link") # Moved here for layout balance
         
         if st.button("🚀 Post Job", use_container_width=True):
-            if company_name and role_title and req_skills:
+            # Check if all 6 fields are filled
+            if company_name and job_title and role_type and req_skills:
                 with st.spinner("Validating and posting to Notion..."):
-                    success = post_job_to_notion(role_title, company_name, req_skills, job_desc, contact_info)
+                    # Now passing exactly 6 arguments to match your new definition
+                    success = post_job_to_notion(
+                        job_title,      # matches 'title'
+                        role_type,      # matches 'role_detail'
+                        company_name,   # matches 'company'
+                        req_skills,     # matches 'skills'
+                        job_desc,       # matches 'description'
+                        contact_info    # matches 'contact'
+                    )
+                    
                     if success:
                         st.success("Job posted successfully! It is now visible to students.")
                         time.sleep(2)
                         st.rerun()
             else:
-                st.warning("Please fill in Company, Role, and Skills.")
-    
-    st.markdown("---")
-    st.markdown("### 📋 Current Active Listings")
-    # Quick view of what's currently in DB
-    current_jobs = fetch_jobs_from_notion()
-    if current_jobs:
-        for job in current_jobs:
-            with st.expander(f"{job['role']} at {job['company']}"):
-                st.write(f"**Skills:** {job['skills']}")
-                st.write(job['description'])
-    else:
-        st.info("No active jobs found in the database.")
+                st.warning("Please fill in Company, Job Title, Role Type, and Skills.")
 
 
 # --- STUDENT VIEW ---
